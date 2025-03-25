@@ -21,7 +21,7 @@ func StartP2P(port int) (p2phost.Host, error) {
 		return nil, err
 	}
 	fmt.Printf("P2P node started. Listening on: /ip4/127.0.0.1/tcp/%d\n", port)
-	fmt.Println("Node ID: ", host.ID().String())
+	fmt.Println("Node ID: ", host.ID().Loggable())
 
 	pingService := &ping.PingService{Host: host}
 	host.SetStreamHandler("/ping/1.0.0", func(s net.Stream) {
