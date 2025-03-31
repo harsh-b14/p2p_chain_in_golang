@@ -9,7 +9,7 @@ type Account struct {
 }
 
 type State struct {
-	Accounts map[[20]byte]*Account
+	Accounts map[[20]byte]*Account // map[key]value
 	mu       sync.RWMutex
 }
 

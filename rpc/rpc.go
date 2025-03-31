@@ -19,8 +19,12 @@ func StartRPC(port int) {
 	http.ListenAndServe(fmt.Sprintf(":%d", port), r)
 }
 
+func AddBlock(block *core.Block) {
+	blockchain = append(blockchain, block)
+}
+
 func getBlockNumber(w http.ResponseWriter, r *http.Request) {
-	blockNum := len(blockchain) - 1
+	blockNum := len(blockchain)
 	json.NewEncoder(w).Encode(blockNum)
 }
 
