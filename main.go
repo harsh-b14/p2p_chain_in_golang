@@ -1,17 +1,20 @@
 package main
 
 import (
-	"context"
-	"flag"
+	// "context"
+	// "flag"
 	"fmt"
 	"log"
 
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p/core/host"
+
 	// "github.com/libp2p/go-libp2p/core/peer"
-	"github.com/multiformats/go-multiaddr"
-	"github.com/harsh-b14/p2p-chain/rpc"
 	"github.com/harsh-b14/p2p-chain/miner"
+	"github.com/harsh-b14/p2p-chain/rpc"
+	"github.com/harsh-b14/p2p-chain/storage"
+	"github.com/harsh-b14/p2p-chain/utils"
+	"github.com/multiformats/go-multiaddr"
 )
 
 func main() {
@@ -24,19 +27,29 @@ func main() {
 	host1, err := startNode(4001)
 	host2, err := startNode(4002)
 
+	_, _, addr1, err := utils.GenerateKeysAndAddress()
+	_, _, addr2, err := utils.GenerateKeysAndAddress()
+
 	if err != nil {
 		log.Fatalf("Failed to start the node: %v", err)
 	}
 
 	// Display node info
 	fmt.Printf("✅ Multiple P2P Node started. Listening on: /ip4/127.0.0.1/tcp/%d and /ip4/127.0.0.1/tcp/%d \n", 4001, 4002)
+	fmt.Println()
 	fmt.Println("First node Id ", host1.ID())
+	fmt.Println("First node adderss", addr1)
+	fmt.Println()	
 	fmt.Println("Second node Id ", host2.ID())
+	fmt.Println("Second node adderss", addr2)
 	fmt.Println()
 
-	fmt.Println("Mining the genesis block...")
-	miner.MineGenesisBlock(host1.ID())
-	fmt.Println("Mining the genesis block...")
+	miner.MineGenesisBlock(addr1)
+	fmt.Println("Genesis block mined!!!")
+	fmt.Println()
+
+	storage.StartDataBase()
+	fmt.Println()
 
 	// Start RPC server (optional)
 	go rpc.StartRPC(800)

@@ -13,6 +13,12 @@ type State struct {
 	mu       sync.RWMutex
 }
 
+// func (s *State) CreateAccount() *Account {
+// 	s.mu.Lock()
+// 	defer s.mu.Unlock()
+
+// }
+
 func (s *State) GetAccount(addr [20]byte) *Account {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

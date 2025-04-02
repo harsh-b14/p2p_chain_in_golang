@@ -2,6 +2,7 @@ package miner
 
 import (
 	"time"
+
 	"github.com/harsh-b14/p2p-chain/core"
 	"github.com/harsh-b14/p2p-chain/txpool"
 )

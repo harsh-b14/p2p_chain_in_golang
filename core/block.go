@@ -25,6 +25,12 @@ type Transaction struct {
 	V, R, S *big.Int
 }
 
+type UnSignedTx struct {
+	To    [20]byte 
+	Value uint64         
+	Nonce uint64        
+}
+
 type Block struct {
 	Header       Header
 	Transactions []Transaction
