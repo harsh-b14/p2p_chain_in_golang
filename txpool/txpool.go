@@ -86,7 +86,7 @@ func (pool *TxPool) Print() {
 	defer pool.mu.Unlock()
 	for i, tx := range pool.Transactions {
 		println("Transaction: ", i)
-		println("Hash: ", tx.Hash)
+		// println("Hash: ", tx.Hash)
 		println("Nonce: ", tx.Nonce)
 		println("V: ", tx.V)
 		println("R: ", tx.R)

@@ -52,7 +52,7 @@ func main() {
 	fmt.Println()
 
 	// Start RPC server (optional)
-	go rpc.StartRPC(800)
+	go rpc.StartRPC(8000)
 
 	// Keep the node running
 	select {}

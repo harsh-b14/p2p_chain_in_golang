@@ -5,11 +5,23 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
 )
+
+func GenerateKeysAndAddress() (*ecdsa.PrivateKey, string, common.Address, error) {
+	privateKey, err := crypto.GenerateKey()
+	if err != nil {
+		return nil, "", common.Address{}, err
+	}
+	address := crypto.PubkeyToAddress(privateKey.PublicKey)
+	privateKeyHex := hex.EncodeToString(crypto.FromECDSA(privateKey))
+
+	return privateKey, privateKeyHex, address, nil
+}
 
 // DecodeData decodes the data into the entity
 // Entity should be a pointer to the struct to which the data should be decoded
@@ -36,13 +48,12 @@ func EncodeData(data interface{}, isJson bool) ([]byte, error) {
 	return encodedData, nil
 }
 
-func GenerateKeysAndAddress() (*ecdsa.PrivateKey, string, common.Address, error) {
-	privateKey, err := crypto.GenerateKey()
-	if err != nil {
-		return nil, "", common.Address{}, err
+func DecodeSignature(sig []byte) (r, s, v *big.Int) {
+	if len(sig) != crypto.SignatureLength {
+		panic(fmt.Sprintf("wrong size for signature: got %d, want %d", len(sig), crypto.SignatureLength))
 	}
-	address := crypto.PubkeyToAddress(privateKey.PublicKey)
-	privateKeyHex := hex.EncodeToString(crypto.FromECDSA(privateKey))
-
-	return privateKey, privateKeyHex, address, nil
+	r = new(big.Int).SetBytes(sig[:32])
+	s = new(big.Int).SetBytes(sig[32:64])
+	v = new(big.Int).SetBytes([]byte{sig[64] + 27})
+	return r, s, v
 }

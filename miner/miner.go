@@ -25,7 +25,7 @@ func MineGenesisBlock(minerAddr [20]byte) *core.Block {
 func MineBlock(txPool *txpool.TxPool, prevBlock *core.Block, minerAddr [20]byte) *core.Block {
 	txs := txPool.GetAllTxs()
 	header := core.Header{
-		ParentHash: prevBlock.Header.Hash(),
+		// ParentHash: prevBlock.Header.Hash(),
 		Miner:      minerAddr,
 		Number:     prevBlock.Header.Number + 1,
 		Timestamp:  uint64(time.Now().Unix()),
