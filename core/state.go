@@ -39,12 +39,6 @@ var (
 	currentNonce = uint64(0)
 )
 
-// func (s *State) CreateAccount() *Account {
-// 	s.mu.Lock()
-// 	defer s.mu.Unlock()
-
-// }
-
 func (s *State) GetAccount(addr [20]byte) *Account {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -80,6 +74,7 @@ func GenerateWallet() Wallet {
 	privateKeyHex := fmt.Sprintf("%x", crypto.FromECDSA(privateKey))
 	address := crypto.PubkeyToAddress(privateKey.PublicKey).Hex()
 
+	fmt.Printf("Generated Address: %s\n\n", address)
 	wallet := Wallet{Address: address, PrivateKey: privateKeyHex}
 	keyStore.Wallets = append(keyStore.Wallets, wallet)
 	SaveKeyStore()

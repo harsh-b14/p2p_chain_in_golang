@@ -15,7 +15,7 @@ type TxPool struct {
 var TransactionPool *TxPool = NewTxPool()
 
 func NewTxPool() *TxPool {
-	return &TxPool{}
+	return &TxPool{Transactions: []core.Transaction{}}
 }	
 
 func (pool *TxPool) AddTransaction(tx core.Transaction) *TxPool {

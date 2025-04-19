@@ -5,7 +5,9 @@ import (
 	// "flag"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p/core/host"
 
@@ -13,9 +15,12 @@ import (
 	"github.com/harsh-b14/p2p-chain/miner"
 	"github.com/harsh-b14/p2p-chain/rpc"
 	"github.com/harsh-b14/p2p-chain/storage"
+	"github.com/harsh-b14/p2p-chain/txpool"
 	"github.com/harsh-b14/p2p-chain/utils"
 	"github.com/multiformats/go-multiaddr"
 )
+
+var NodeIds []common.Address
 
 func main() {
 	// port := flag.Int("port", 4001, "Port to listen on")
@@ -34,6 +39,8 @@ func main() {
 		log.Fatalf("Failed to start the node: %v", err)
 	}
 
+	NodeIds = append(NodeIds, addr1, addr2)
+
 	// Display node info
 	fmt.Printf("✅ Multiple P2P Node started. Listening on: /ip4/127.0.0.1/tcp/%d and /ip4/127.0.0.1/tcp/%d \n", 4001, 4002)
 	fmt.Println()
@@ -44,12 +51,15 @@ func main() {
 	fmt.Println("Second node adderss", addr2)
 	fmt.Println()
 
-	miner.MineGenesisBlock(addr1)
+	genesisBlock := miner.MineGenesisBlock(addr1)
 	fmt.Println("Genesis block mined!!!")
+	rpc.Blockchain = append(rpc.Blockchain, genesisBlock)
 	fmt.Println()
 
 	storage.StartDataBase()
 	fmt.Println()
+
+	go StartMining()
 
 	// Start RPC server (optional)
 	go rpc.StartRPC(8000)
@@ -66,24 +76,38 @@ func startNode(port int) (host.Host, error) {
 	return libp2p.New(libp2p.ListenAddrs(listenAddr))
 }
 
-// func connectToPeer(host host.Host, peerAddr string) error {
-// 	addr, err := multiaddr.NewMultiaddr(peerAddr)
-// 	if err != nil {
-// 		return fmt.Errorf("invalid multiaddress: %v", err)
-// 	}
-// 	Extract peer ID from address
-// 	peerInfo, err := peer.AddrInfoFromP2pAddr(addr)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to parse peer info: %v", err)
-// 	}
-// 	Connect to the peer
-// 	return host.Connect(context.Background(), *peerInfo)
-// }
+func StartMining(){
+	ticker := time.NewTicker(2 * time.Second)
+	var cnt int32 = 0
+	for range ticker.C {
+		minerID := NodeIds[cnt%2]
+		cnt++
+		// currentMiner = (currentMiner + 1) % len(NodeIds)
 
-// Start a new blockchain with a genesis block
+		// var transactions []core.Transaction
+		// if len(txPool) > 0 {
+		// 	transactions = append(transactions, txPool...)
+		// 	txPool = []core.Transaction{}
+		// } else {
+		// 	fmt.Printf("[%s] No transactions to include. Mining empty block.\n", minerID)
+		// }
 
-// Start RPC server
-// func startRPCServer(port int) {
-// 	fmt.Printf("📡 RPC server running on port %d\n", port)
-// 	// Implement RPC server logic here
-// }
+		// block := core.Block{
+		// 	Miner:       minerID,
+		// 	Transactions: transactions,
+		// 	Timestamp:   time.Now().Unix(),
+		// }
+		// blockchain = append(blockchain, block)
+
+		// Simulate mining process
+		time.Sleep(2 * time.Second)
+		// Simulate mining a block
+		block := miner.MineBlock(txpool.TransactionPool, rpc.Blockchain[len(rpc.Blockchain)-1], minerID)
+		if block == nil {
+			fmt.Printf("[%s] No transactions to include. Mining empty block.\n\n", minerID)
+			continue
+		}
+		rpc.Blockchain = append(rpc.Blockchain, block)
+		fmt.Printf("[%s] Mined block with %d transaction(s)\n\n", minerID, len(txpool.TransactionPool.Transactions))
+	}
+}

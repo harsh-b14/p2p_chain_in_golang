@@ -20,6 +20,8 @@ func GenerateKeysAndAddress() (*ecdsa.PrivateKey, string, common.Address, error)
 	address := crypto.PubkeyToAddress(privateKey.PublicKey)
 	privateKeyHex := hex.EncodeToString(crypto.FromECDSA(privateKey))
 
+	fmt.Printf("Private Key: %s\n\n", address)
+
 	return privateKey, privateKeyHex, address, nil
 }
 

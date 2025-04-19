@@ -10,7 +10,7 @@ import (
 	"github.com/harsh-b14/p2p-chain/txpool"
 )
 
-var blockchain []*core.Block
+var Blockchain []*core.Block
 var currentNonce uint64 = 0
 
 func StartRPC(port int) {
@@ -18,17 +18,18 @@ func StartRPC(port int) {
 	r.HandleFunc("/blockNumber", getBlockNumber).Methods("GET")
 	r.HandleFunc("/block", getBlock).Methods("GET")
 	r.HandleFunc("/sendTx", sendTransaction).Methods("POST")
+	r.HandleFunc("/getBalance", getBalance).Methods("GET")
 
 	fmt.Printf("RPC server runningon port %d\n", port)
-	http.ListenAndServe(fmt.Sprintf (":%d", port), r)
+	http.ListenAndServe(fmt.Sprintf(":%d", port), r)
 }
 
 func AddBlock(block *core.Block) {
-	blockchain = append(blockchain, block)
+	Blockchain = append(Blockchain, block)
 }
 
 func getBlockNumber(w http.ResponseWriter, r *http.Request) {
-	blockNum := len(blockchain)
+	blockNum := len(Blockchain)
 	json.NewEncoder(w).Encode(blockNum)
 }
 
@@ -40,7 +41,7 @@ func getBlock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	blockNum := keys[0]
-	for _, block := range blockchain {
+	for _, block := range Blockchain {
 		if fmt.Sprintf("%d", block.Header.Number) == blockNum {
 			json.NewEncoder(w).Encode(block)
 			return
@@ -85,8 +86,44 @@ func sendTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Add to tx pool
-	txpool.TransactionPool.AddTx([]core.Transaction{*signedTx})
+	var txs []core.Transaction
+	txs = append(txs, *signedTx)
+	txpool.TransactionPool.AddTx(txs)
 	fmt.Println("Transaction sent successfully")
 	fmt.Printf("Tx Hash: %x\n", signedTx.EncodeTx())
 	json.NewEncoder(w).Encode(signedTx)
+}
+
+func getBalance(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Query().Get("address") == "" {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+	address := r.URL.Query().Get("address")
+	fmt.Println("Value of address:", address)
+
+	// Convert address to [20]byte
+
+	// Get the balance of the address
+	// account, err := types.GetAccount(toAddress)
+	// if err != nil {
+	// 	http.Error(w, "Error getting account", http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// Encode the balance to JSON
+	// balanceJSON, err := json.Marshal(account.Balance)
+	// if err != nil {
+	// 	http.Error(w, "Error encoding balance to JSON", http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// Write the JSON response
+	// w.Header().Set("Content-Type", "application/json")
+	// _, err = w.Write(balanceJSON)
+	// if err != nil {
+	// 	fmt.Println("Error writing response:", err)
+	// }
+
+	w.WriteHeader(http.StatusOK)
 }
